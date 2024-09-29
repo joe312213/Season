@@ -1,2 +1,2 @@
 # Season
-basic encryption lib
+basic encryption lib. currently works with ascii data
