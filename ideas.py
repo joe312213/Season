@@ -13,7 +13,7 @@ r1 = setsize - 1
 s = 1 << 24 # 128 is reasonable default. must be power of 2  - if input value changes by 1, output mapping changes by this value (usually). also the number of mapping zones 
 sl = s.bit_length() - 1 # log2(s)   - pre-comp used for optimization of mapping algorithm 
 rsize = setsize >> sl # number of values within each mapping range  - pre-comp used for optimization of mapping algorithm 
-# rsize will be power of 2, providing s <= 2^symbits
+# rsize will be power of 2, providing s <= 2^(swin*symbits)
 rsizel = rsize.bit_length() - 1
 
 
@@ -27,7 +27,6 @@ rsizel = rsize.bit_length() - 1
 # n < 128 -> m = 2n,  n >= 128 -> m = 2(n-127) - 1 = 2n - 255
 # or for a change of 1 to 8 we end up with 8 zones:
 # 0 - 0, 1 - 8, 2 - 16, 3 - 24 .. 31 - 248 | 32 - 1, 33 - 9, 34 - 17 .. 63 - 249 | 64 - 2, 65 - 10 .. 95 - 250 |  
-# n -> 8n   |   n -> 8n - 1023  |   n -> 8n - 2046   |   n -> 8n - 3069   |   n -> 8n - ...
 # n -> 8n   |   n -> 8n - 255  |   n -> 8n - 510   |   n -> 8n - 765   |   n -> 8n - 1020   |   n -> 8n - 1275   ...
 # or
 # n -> 8n   |   n -> 8n - r1 |  n -> 8n - r2 | n -> 8n - r3  ... n -> 8n - r7
@@ -41,7 +40,7 @@ rsizel = rsize.bit_length() - 1
 # but also
 # r1 = nmax - 1,  r2 = nmax >> 1 - 2,  r3 = nmax >> 2 - nmax - 3,  r4 = nmax >> 3 - nmax >> 2 - 4,  r5 = nmax >> 4 -  .. hmm, not sure useful, just use a multiply
 
-# number of buckets = s
+# number of zones = s
 # q = sn - r[z]
 # q = sn - r1(n >> rzr1)
 # so, reversing the mapping:-
@@ -100,7 +99,7 @@ fig, (there, andback) = plt.subplots(2, sharex=True, sharey=True)
 dispsize = setsize
 if setsize > (1 << 32) :
     dispsize = "2^" + str(setsize.bit_length() - 1)
-fig.suptitle(f'Showing the operation of the rz map function for:\nsetsize: {dispsize}, rz scale factor: {s:.4g}, zone size: {rsize:.4g}')
+fig.suptitle(f'Showing the operation of the rz map function for:\nsetsize: {dispsize}, rz scale factor: 2^{sl}, zone size: 2^{rsizel}')
 fig.set_figheight(9)
 there.set_title("rzmap")
 there.set_xlabel("n")
